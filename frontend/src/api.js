@@ -46,11 +46,9 @@ export const updateTask = async (id, updatedTask) => {
       },
       body: JSON.stringify(updatedTask),
     });
-
     if (!response.ok) {
       throw new Error("No se pudo actualizar la tarea");
     }
-
     const data = await response.json();
     return data;
   } catch (error) {
@@ -69,11 +67,9 @@ export async function completeTask(id) {
       },
       body: JSON.stringify({ completed: true }),
     });
-
     if (!response.ok) {
       throw new Error("Error al completar la tarea");
     }
-
     return await response.json();
   } catch (error) {
     console.error("Error:", error);
@@ -83,17 +79,15 @@ export async function completeTask(id) {
 // Eliminar una tarea
 export async function deleteTask(id) {
   try {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE",
-    });
-
+    const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
     if (!response.ok) {
       throw new Error("Error al eliminar la tarea");
     }
-
-    return await response.json();
+    return response.json(); // No es necesario `await` aquí
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error eliminando la tarea:", error);
+    throw error; // Se propaga el error
   }
 }
+
 

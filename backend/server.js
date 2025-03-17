@@ -18,49 +18,59 @@ app.get("/", (req, res) => {
 
 // Ruta para crear una nueva tarea
 app.post('/api/tasks', (req, res) => {
-  const newTask = req.body;
-
+  const { title, description } = req.body;
+  if (!title || !description) {
+    return res.status(400).json({ error: "Title y description son obligatorios" });
+  }
   const newTaskWithId = {
     id: taskIdCounter++,
-    ...newTask
+    title,
+    description,
+    createdAt: new Date()
   };
-
   tasks.push(newTaskWithId);
   res.status(201).json(newTaskWithId);
 });
 
 // Ruta para actualizar una tarea
 app.put('/api/tasks/:id', (req, res) => {
-    const taskIndex = tasks.findIndex(t => t.id == req.params.id);
-    if (taskIndex !== -1) {
-        tasks[taskIndex] = { ...tasks[taskIndex], ...req.body };
-        return res.json(tasks[taskIndex]);
-    }
-    res.status(404).json({ error: 'Tarea no encontrada' });
+  const taskIndex = tasks.findIndex(t => t.id == req.params.id);
+  if (taskIndex === -1) {
+      return res.status(404).json({ error: "Tarea no encontrada" });
+  }
+  const { title, description } = req.body;
+  if (!title || !description) {
+      return res.status(400).json({ error: "Title y description son obligatorios" });
+  }
+  tasks[taskIndex] = {
+      ...tasks[taskIndex],
+      title,
+      description
+  };
+  res.json(tasks[taskIndex]);
 });
 
 // Ruta para marcar una tarea como completada
 app.patch('/api/tasks/:id', (req, res) => {
   const { id } = req.params;
   const { completed } = req.body;
-
   const task = tasks.find(task => task.id == id);
   if (!task) {
     return res.status(404).json({ message: "Tarea no encontrada" });
   }
-
   task.completed = completed;
   res.json(task);
 });
 
 // Ruta para eliminar una tarea
 app.delete('/api/tasks/:id', (req, res) => {
-    const taskIndex = tasks.findIndex(t => t.id == req.params.id);
-    if (taskIndex !== -1) {
-        tasks.splice(taskIndex, 1);
-        return res.json({ message: 'Tarea eliminada' });
-    }
-    res.status(404).json({ error: 'Tarea no encontrada' });
+  const { id } = req.params;
+  const taskIndex = tasks.findIndex(task => task.id == id);
+  if (taskIndex === -1) {
+    return res.status(404).json({ error: 'Tarea no encontrada' });
+  }
+  tasks = tasks.filter(task => task.id != id);
+  res.json({ message: 'Tarea eliminada' });
 });
 
 const PORT = process.env.PORT || 5000;
